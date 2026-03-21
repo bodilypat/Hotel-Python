@@ -4,7 +4,7 @@
 | -- It contains links to different sections of the app and provides a consistent way for users to navigate between pages.
  */ 
 import React from 'react';
-import './styles.css'; // Importing CSS for styling the navbar
+import './Navbar.css'; // Importing CSS for styling the navbar
 
 export default function Navbar() {
     return (
