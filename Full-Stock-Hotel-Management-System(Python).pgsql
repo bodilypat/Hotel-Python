@@ -1,66 +1,99 @@
-Fullstack-Hotel-Management-System/
-├── backend/                              
+Full-Stack-Hotel-Management-System/
+├── backend(Python)                            
 │   │     
 │   ├── app/  
 │   │   ├── main.py                                            # Entry point
-│   │   ├── routes/                                            # API endpoints
-│   │   │   ├── auth.py                                        # App settings
-│   │   │   ├── rooms.py                                       
-│   │   │   ├── bookings.py                                     
-│   │   │   ├── customers.py
-│   │   │   └──                                    
 │   │   │
-│   │	├── models/                                            # Database tables SQLAlchemy ORM models        
-│   │	│   ├── User.py           
-│   │   │   ├── Room.py
-│   │   │   ├── Booking.py
-│   │   │   ├── Customer.py
-│   │   │   └── 
+│   │   ├── core/                                              # Core Configs (Security(JWT), Config(env variables))
+│   │   │   ├── config.py                                      # Settings (env variables)
+│   │   │   ├── security.py                                    # JWT, password hashing   
+│   │   │   └── dependencies.py                                # Global dependencies
+│   │   │
+│   │   ├── db/                                                # Database connection/session
+│   │   │   ├── base.py                                        # Base model import
+│   │   │   ├── session.py                                     # DB connecton  
+│   │   │   └── init_db.py                                     # Seed data (optional)                                   
+│   │   │
+│   │	├── models/                                            # SQLAlchemy ORM models        
+│   │	│   ├── guest.py           
+│   │   │   ├── room.py
+│   │   │   ├── reservation.py
+│   │   │   ├── payment.py 
+│   │   │   ├── service.py 
+│   │   │   ├── staff.py
+│   │   │   └── housekeeping.py
 │   │   │  
-│   │   ├── schemas/                                           # Pydantic models(DTOS) Request/response/
-│   │   │    ├── user_schema.py       
-│   │   │    ├── room_schema.py                 
-│   │   │    ├── booking_schema.py     
-│   │   │    ├── customer_schema.py              
-│   │   │    └──      
-│   │	├── services/                                         # Bussiness logic layer
-│   │   │	├── auth_service.py       
-│   │   │ 	├── room_service.py                 
-│   │   │	├── booking_service.py       
-│   │   │	└──  
+│   │   ├── schemas/                                        # Request/response validation(Pydantic models)
+│   │   │   ├── guest.py       
+│   │   │   ├── room.py                 
+│   │   │   ├── reservation.py     
+│   │   │   ├── payment.py              
+│   │   │   ├── service.py
+│   │   │   └── auth.py  
+│   │   │   
+│   │   ├── crud/                                           # Database access layer  (Direct DB queries only, No business logic)
+│   │   │   ├── guest.py       
+│   │   │   ├── room.py                 
+│   │   │   ├── reservation.py     
+│   │   │   ├── payment.py              
+│   │   │   ├── service.py
+│   │   │   └── staff.py  
 │   │   │
-│   │	├── db/                           
-│   │   │	├── database.py                                  # Database connection
-│   │   │	├──               
-│   │	│	└──         
+│   │	├── services/                                       # Bussiness logic layer (heart of system), Room availability, Booking rules, Billing calculation
+│   │   │	├── auth_service.py       
+│   │   │ 	├── booking_service.py                 
+│   │   │	├── availability_service.py       
+│   │   │	└── billing_service.py
+│   │   │
+│   │	├── api/                                             # API layer (HTTP requests, Calls services, Returns response)
+│   │   │	├── deps.py                                      # DB + auth dependencies                                  
+│   │   │	├── router.py                                    # Main router              
+│   │	│	└── endpoints/                                   # Route modules  
+│   │	│       ├── auth.py     
+│   │	│       ├── guest.py
+│   │	│       ├── rooms.py
+│   │	│       ├── reservations.py
+│   │	│       ├── payments.py
+│   │   │       └── services.py
 │   │	│ 
-│   │	├── core/                           
-│   │   │	├── config.py                     
-│   │   │	└── security.py  
-│   │  	└── ...                
+│   │	├── utils/                                           # Helper functions
+│   │   │	├── logger.py                   
+│   │   │	├── validators.py 
+│   │   │	└── constants.py
+│   │  	└── tests                                            # Unit & integration tests
+│   │    	├── test_guests.py
+│   │   	├── test_rooms.py                   
+│   │   	└── test_reservations.py                 
 │   │                                
-│   ├── .env
-│   └── requirements.txt                         
+│   ├── alembic/                                             # DB migrations
+│   ├── alembic.ini                                          
+│   │
+│   ├── .env                                                 # Environment variables
+│   ├── .gitignore
+│   ├── requirements.txt
+│   ├── Dockerfile                                           # Contrainerization
+│   └── docker-compose.yml                                   # Multi-service setup                     
 │   
 ├── frontend/                             
-│   ├── public/                                                         # Use for Static files, images that don't change SEO/meta setup
-│   │   ├── index.html                                                  # Main Entry
-│   │   ├── manifest.json                                               # Used for PWA(Progressive Web App) support
-│   │   ├── robots.txt                                                  # Control search engine crawing
-│   │   ├── favicon.ico                                                 # Browser tab icon
+│   ├── public/                                              # Use for Static files, images that don't change SEO/meta setup
+│   │   ├── index.html                                       # Main Entry
+│   │   ├── manifest.json                                    # Used for PWA(Progressive Web App) support
+│   │   ├── robots.txt                                       # Control search engine crawing
+│   │   ├── favicon.ico                                      # Browser tab icon
 │   │   └── assets/
-│   │   	├── images/                                                 # Branding & UI
+│   │   	├── images/                                      # Branding & UI
 │   │	    │   ├── hotel.jpg      
 │   │	    │   ├── room1.jpg
-│   │	    │   ├── room2.jpg
-│   │       │   └──   
-│   │   	└── icons/                                                  # Used for sidebar/navigation
+│   │       │   └── room2.jpg  
+│   │   	└── icons/                                       # Used for sidebar/navigation
 │   │	        ├── dashboard.svg        
 │   │	        ├── room.svg
-│   │	        ├── booking.svg
-│   │           └──    
-│   ├── src/                                    
-│   │	├── components/                          
+│   │           └── booking.svg   
+│   ├── src/    
+│   │	├── main.jsx
+│   │	├── App.jsx 
+│   │	├── assets/                                          # Local assets (CSS/images)
+│   │	├── components/                                      # Reusable UI components
 │   │	│   ├── Navbar.jsx             
 │   │	│   ├── Sidebar.jsx
 │   │	│   ├── RoomCard.jsx          
@@ -68,44 +101,33 @@ Fullstack-Hotel-Management-System/
 │   │	│   ├── CustomerCard.jsx          
 │   │	│   ├── Modal.jsx
 │   │	│   ├── Loader.jsx
-│   │	│   ├── ProtectedRoutes.jsx
-│   │   │   └──             
-│   │	├── pages/                          
+│   │   │   └── ProtectedRoutes.jsx        
+│   │	├── pages/                                          # Pages (mapped to routes)
 │   │	│   ├── Dashboard.jsx        
-│   │	│   ├── Rooms.jsx
-│   │	│   ├── Bookings.jsx 
-│   │	│   ├── Customer.jsx
-│   │	│   ├── Login.jsx     
-│   │   │   └──             
+│   │	│   ├── Guests.jsx
+│   │	│   ├── Rooms.jsx 
+│   │	│   ├── Reservations.jsx
+│   │	│   ├── Payments.jsx
+│   │	│   ├── Services.jsx
+│   │   │   └── Login.jsx
 │   │   │ 
-│   │	├── services/                          
+│   │	├── services/                                       # API calls
 │   │	│   ├── api.js        
-│   │	│   ├── roomService.js
-│   │	│   ├── bookingService.js        
-│   │	│   ├── authService.jsx
-│   │	│   ├──         
-│   │   │   └──        
-│   │	├── context/                          
-│   │	│   ├── AuthContext.jsx
-│   │   │   └──     
-│   │	├── hooks/                               
-│   │	│   ├── useAuth.jsx
-│   │	│   ├── useFetch.js        
-│   │   │   └──   
-│   │	├── utils/                               
-│   │	│   ├── helpers.js        
-│   │   │   └──         
-│   │	├── assets/                               
-│   │	│   ├── images/     
-│   │   │   └──         
-│   │	├── routes/                               
-│   │	│   ├── AppRoutes.jsx
-│   │   │   └──                                
-│   │  	└── ...   
-│   ├── App.jsx 
-│   └── main.jsx
-├── .env                                        # Environment variables
-├── .gitignore
-├── package.json
-│
+│   │	│   ├── guestService.js
+│   │	│   ├── roomService.js        
+│   │	│   ├── reservationService.jsx      
+│   │   │   └── authService.js
+│   │	├── context/                                        # Global state
+│   │   │   └── AuthContext.jsx   
+│   │	├── hooks/                                          # Custom hooks       
+│   │   │   └── useAuth.js  
+│   │	├── utils/                                          # Helpers   
+│   │   │   └── helpers.js       
+│   │	├── routes/                                         # Route definitions                          
+│   │   │   └── AppRoutes.jsx                               
+│   │  	└── styles/   
+│   │       └── AppRoutes.jsx
+│   ├── .env
+│   ├── .gitignore 
+│   └── package.json
 └── README.md
