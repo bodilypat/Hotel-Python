@@ -9,69 +9,67 @@ Full-Stack-Hotel-Management-System/
 │   │   │   ├── security.py                                    # JWT, password hashing   
 │   │   │   └── database.py                                    # Global dependencies
 │   │   │
-│   │	├── api/                                               # API layer (HTTP requests, Calls services, Returns response)
-│   │   │	├── deps.py                                        # DB + auth dependencies                                  
-│   │   │	├── router.py                                      # Main router              
-│   │	│	└── endpoints/                                     # Route modules  
-│   │	│       ├── auth.py     
-│   │	│       ├── guest.py
-│   │	│       ├── rooms.py        
-│   │	│       ├── reservations.py
-│   │	│       ├── payments.py
-│   │   │       └── services.py
-│   │	│
+│   │	├── api/                                               # API layer (HTTP requests, Calls services, Returns response)                              
+│   │   │	├── v1/              
+│   │	│   │   ├── router.py                                  # Combine all routes
+│   │   │   │   └── endpoints/                                 # FastAPI Endpoints
+│   │	│   │       ├── auth.py
+│   │	│   │       ├── romms.py
+│   │	│   │       ├── bookings.py
+│   │	│   │       ├── guests.py
+│   │	│   │       ├── payments.py
+│   │   │   │       └── dashboard.py
+│   │	│   │
 │   │	├── models/                                            # SQLAlchemy ORM models        
 │   │	│   ├── user.py           
 │   │   │   ├── room.py
 │   │   │   ├── booking.py
-│   │   │   └── guest.py 
+│   │   │   ├── guest.py
+│   │   │   └── payment.py
 │   │	│
 │   │   ├── schemas/                                           # Request/response validation(Pydantic models)
 │   │   │   ├── user.py       
 │   │   │   ├── room.py                           
 │   │   │   ├── booking.py
-│   │   │   └── guest.py  
+│   │   │   ├── guest.py
+│   │   │   └── payment.py
 │   │   │
 │   │	├── services/                                          # Bussiness logic layer (heart of system)
 │   │   │	├── auth_service.py       
-│   │   │ 	├── booking_service.py                 
-│   │   │	├── availability_service.py       
-│   │   │	└── billing_service.py
+│   │   │ 	├── rook_service.py                 
+│   │   │	├── booking_service.py 
+│   │   │   ├── guest_service.py      
+│   │   │	└── payment_service.py
 │   │	│
 │   │   ├── crud/                                              # Database queries
 │   │   │   ├── user.py       
 │   │   │   ├── room.py                 
-│   │   │   ├── booking.py     
-│   │   │   └── guest.py  
-│   │   ├── db/                                                # Database connection/session
-│   │   │   ├── base.py                                        # Base model import
-│   │   │   ├── session.py                                     # DB connecton  
-│   │   │   └── init_db.py                                     # Seed data (optional)                                   
+│   │   │   ├── booking.py    
+│   │   │   ├── guest.py 
+│   │   │   └── guest.py                                     
 │   │   │
 │   │	├── middleware/                                        # Helper functions
-│   │   │	├── logger.py                   
-│   │   │	├── validators.py 
-│   │   │	└── constants.py
-│   │  	└── utils/                                             #          
-│   │   	└── test_reservations.py                 
+│   │   │	├── auth.py                   
+│   │   │	└── error_hander.py
+│   │   │
+│   │	├── utils/                                             
+│   │   │	└── helpers.py
+│   │  	└── cosntants/                                        #          
+│   │   	└── roles.py                 
 │   │                                
-│   ├── alembic/                                               # DB migrations
-│   ├── alembic.ini                                          
-│   │
-│   ├── .env                                                   # Environment variables
-│   ├── .gitignore
+│   ├── alembic/                                              # DB migrations
 │   ├── requirements.txt
-│   ├── Dockerfile                                             # Contrainerization
-│   └── docker-compose.yml                                     # Multi-service setup                     
+│   ├── .env                                              
+│   └── docker-compose.yml                                    # Multi-service setup                     
 │   
 ├── frontend/                             
-│   ├── public/                                              # Use for Static files, images that don't change SEO/meta setup
-│   │   ├── index.html                                       # Main Entry
-│   │   ├── manifest.json                                    # Used for PWA(Progressive Web App) support
-│   │   ├── robots.txt                                       # Control search engine crawing
-│   │   ├── favicon.ico                                      # Browser tab icon
-│   │   └── assets/                                          # ONLY static, non-imported assets
-│   │   	├── images/                                      # Branding & UI
+│   ├── public/                                               # Use for Static files, images that don't change SEO/meta setup
+│   │   ├── index.html                                        # Main Entry
+│   │   ├── manifest.json                                     # Used for PWA(Progressive Web App) support
+│   │   ├── robots.txt                                        # Control search engine crawing
+│   │   ├── favicon.ico                                       # Browser tab icon
+│   │   └── assets/                                           # ONLY static, non-imported assets
+│   │   	├── images/                                       # Branding & UI
 │   │	    │   ├── hotel.jpg      
 │   │	    │   ├── room1.jpg
 │   │       │   └── room2.jpg  
@@ -129,7 +127,7 @@ Full-Stack-Hotel-Management-System/
 │   │   │       └── context/
 │   │   │           └── Dashboard.jsx
 │   │   │ 
-│   │	├── shared/                                          # Reusable acros features
+│   │	├── shared/                                           # Reusable acros features
 │   │	│   ├── components/    
 │   │	│   │   ├── ui/
 │   │	│   │   │   ├── Loader.jsx
@@ -145,15 +143,15 @@ Full-Stack-Hotel-Management-System/
 │   │   │   └── constants/
 │   │   │       └── helpers.js
 │   │   │ 
-│   │	├── services/                                       # Global API config 
+│   │	├── services/                                        # Global API config 
 │   │   │   └── api.js
-│   │	├── assets/                                         # Imported assets ONLY
+│   │	├── assets/                                          # Imported assets ONLY
 │   │   │	├── images/                                     
 │   │   │	└── styles/                                       
 │   │	│       ├── globals.css
 │   │   │       └── variables.css
 │   │   │
-│   │	├── config/                                         # Environment & config
+│   │	├── config/                                          # Environment & config
 │   │   │	├── env.js                                    
 │   │   │	└── axiosConfig.js                                    
 │   │  	└── index.css
