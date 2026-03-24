@@ -1,46 +1,95 @@
-#api/v1/endpoints/bookings.py
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
-from app.schemas.booking import BookingCreate, BookingUpdate, BookingResponse
-from app.services import booking_service
-from app.middleware import get_current_user
+#api/v1/bookings.py
 
-router = APIRouter(
-    prefix="/bookings",
-    tags=["bookings"]
+# Bookings API endpoints
+
+from fastapi import APIRouter, Depends, Query
+from typing import Optional, List 
+
+from app.schemas.bookings import (
+    BookingCreate,
+    BookingUpdate,
+    BookingOut
 )
+from app.services.bookings.booking_service import BookingService
 
-# get all bookings for the current user
-@router.get("/", response_model=List[BookingResponse])
-async def get_bookings(current_user: int = Depends(get_current_user)):
-    return await booking_service.get_bookings(user_id=current_user)
+router = APIRouter()
 
-# get a single booking by ID
-@router.get("/{booking_id}", response_model=BookingResponse)
-async def get_booking(booking_id: int, current_user: int = Depends(get_current_user)):
-    booking = await booking_service.get_booking(booking_id=booking_id, user_id=current_user)
-    if not booking:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
-    return booking
+#-------------------
+# Get All Bookings 
+#-------------------
 
-# create a new booking
-@router.post("/", response_model=BookingResponse)
-async def create_booking(booking: BookingCreate, current_user: int = Depends(get_current_user)):
-    return await booking_service.create_booking(booking=booking, user_id=current_user)
+@router.get("/", response_model=List[BookingOut], tags=["Bookings"])
+async def get_all_bookings(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    guest_id: Optional[int] = None,
+    room_id: Optional[int] = None,
+    status: Optional[str] = None,
+    booking_service: BookingService = Depends()
+):
+    """ 
+    Retrieve paginated and filterable list of booking 
+    """
+    return await booking_service.get_all_bookings(
+      page=page, 
+      page_size=page_size, 
+      guest_id=guest_id, 
+      room_id=room_id, 
+      status=status
+    )
 
-# update an existing booking
-@router.put("/{booking_id}", response_model=BookingResponse)
-async def update_booking(booking_id: int, booking: BookingUpdate, current_user: int = Depends(get_current_user)):
-    updated_booking = await booking_service.update_booking(booking_id=booking_id, booking=booking, user_id=current_user)
-    if not updated_booking:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
-    return updated_booking
+#-----------------------
+# Get Booking by ID
+#-----------------------
+@router.get("/{booking_id}", response_model=BookingOut, tags=["Bookings"])
+async def get_booking_by_id(
+    booking_id: int,
+    booking_service: BookingService = Depends()
+):  
+    """ 
+    Retrieve a booking by its ID
+    """
+    return await booking_service.get_booking_by_id(booking_id=booking_id)
 
-# delete a booking
-@router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_booking(booking_id: int, current_user: int = Depends(get_current_user)):
-    deleted = await booking_service.delete_booking(booking_id=booking_id, user_id=current_user)
-    if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
-    return None
+#-----------------------
+# Create New Booking 
+#-----------------------
+@router.post("/", response_model=BookingOut, tags=["Bookings"])
+async def create_booking(
+    booking: BookingCreate,
+    booking_service: BookingService = Depends()
+):
+    """ 
+    Create a new booking (including date validation & availability checks).
+    """
+    return await booking_service.create_booking(booking=booking)
+
+#-----------------------
+# Update Booking by ID
+#-----------------------
+@router.put("/{booking_id}", response_model=BookingOut, tags=["Bookings"])
+async def update_booking(
+    booking_id: int,
+    booking: BookingUpdate,
+    booking_service: BookingService = Depends()
+):
+    """ 
+    Update an existing booking by its ID (including date validation & availability checks).
+    """
+    return await booking_service.update_booking(booking_id=booking_id, booking=booking)
+
+#-----------------------
+# Cancel Booking
+#-----------------------
+@router.delete("/{booking_id}", response_model=BookingOut, tags=["Bookings"])
+async def cancel_booking(
+    booking_id: int,
+    booking_service: BookingService = Depends()
+):
+    """ 
+    Cancel an existing booking by its ID.
+    """
+    await booking_service.cancel_booking(booking_id=booking_id)
+    return {"message": "Booking cancelled successfully."}
+
 
