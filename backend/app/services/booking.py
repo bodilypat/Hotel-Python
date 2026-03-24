@@ -1,3 +1,10 @@
+# -- models/booking.py
+# -- This defines the Booking model using SQLAlchemy, representing the bookings table in the database.
+
+from sqlalchemy import Column, Integer, Date, String, ForeignKey
+from sqlalchemy.orm import relationship
+from app.database import Base
+
 class Booking(Base):
     __tablename__ = "bookings"
 
