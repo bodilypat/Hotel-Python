@@ -1,80 +1,187 @@
-/* src/features/auth/hooks/useAuth.js 
-| -- Custom hook for handling authentication logic. 
- */
-import { useState, useEffect, createContext, useContext } from 'react';
-import * as authService from '../services/auth.storage';
+/* **************************************** */
+/* File: src/features/auth/hooks/useAuth.js */
+/* **************************************** */
+import { useCallback, useEffect, useState } from 'react';
+import {
+    getAccessToken,
+    setAccessToken,
+    getRefreshToken,
+    setRefreshToken,
+    clearTokens,
+    isTokenExpired,
+} from '../utils/tokenHelpers';
 
-/* 
-| -- AUTH Context
- */
-const AuthContext = createContext();
+import {
+    getStoreUser,
+    setStoredUser,
+    clearStoredUser,
+    normalizeUser,
+    emitLoginEvent,
+} from '../utils/authHelpers';
 
-/* 
-| -- Provider (Wrap your App) 
- */
+import {
+    AUTH_EVENTS,
+} from '../constants/authConstants';
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+export const useAuth = () => {
+    const [user, setUser] = useState(() => 
+        getStoredUser()
+    );
 
-    // Load user on app startup 
-    useEffect(() => {
-        const initAuth = () => {
-            const storedUser = authService.getCurrentUser();
-            if (storedUser) {
-                setUser(storedUser);
-            }   
-            setLoading(false);
-        };
-        initAuth();
+    const [loading, setLoading] = useState(() => {
+        const token = getAccessToken();
+
+        return Boolean(token && !isTokenExpired(token));
+    });
+
+    const login = useCallback(async (credentials) => {
+        const response = await authApi.login(credentials);
+
+        const accessToken = 
+            response?.accessToken || response?.token;
+
+        const refreshToken = 
+            response?.refreshToken;
+
+        const authenticateUser = normalizeUser(
+            response?.user 
+        );
+
+        if (accessToken) {
+            setAccessToken(accessToken);
+        }
+
+        if (refreshToken) {
+            setRefreshToken(refreshToken);
+        }
+
+        if (authenticateUser) {
+            setStoredUser(authenticateUser);
+            setUser(authenticateUser);
+            emitLoginEvent(authenticateUser);
+        }
+
+        return response;
     }, []);
 
-    // Login 
-    const login = (token, userData) => {
-        if (!token || !userData) return;
+    const logout = useCallback(async () => {
+        try {
+            const token = getAccessToken();
 
-        // Save token and user in storage
-        authService.setToken(token);
-        authService.setUser(userData);
+            if (token) {
+                await authApi.logout();
+            }
+        } catch {
+            /* Local logout should still happen if the API fails */
+        } finally {
+            clearTokens();
+            clearStoredUser();
+            setUser(null);
+            setLoading(false);
+            return null;
+        }
 
-        // Update state
-        setUser(userData);
-    }
+        try {
+            setLoading(true);
 
-    // Logout
-    const logout = () => {
-        authStorage.clearAuthData();
-        setUser(null);
+            const response = 
+                await authApi.getCurrentUser(token);
+
+            const authenticateUser = normalizeUser(
+                response?.user || response 
+            );
+
+            setStoredUser(authenticateUser);
+            setUser(authenticateUser);
+
+            return authenticateUser;
+        } catch {
+            clearTokens();
+            clearStoredUser();
+            setUser(null);
+
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        const token = getAccessToken();
+
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+
+        if (isTokenExpired(token)) {
+            clearTokens();
+            clearStoredUser();
+            setUser(null);
+            setLoading(false);
+            return;
+        }
+
+        refreshUser();
+    }, [refreshUser]);
+
+    useEffect(() => {
+        const handleLogin = (event) => {
+            setUser(event.detail);
+        };
+
+        const handleLogout = () => {
+            setUser9null;
+        };
+
+        const handleUserUpdated = (event) => {
+            setUser(event.detail);
+        };
+
+        window.addEventListener(
+            AUTH_EVENTS.LOGIN,
+            handleLogin 
+        );
+
+        window.addEventListener(
+            AUTH_EVENTS.LOGOUT,
+            handleLogout
+        );
+
+        window.addEventListener(
+            AUTH_EVENTS.USER_UPDATED,
+            handleUserUpdated 
+        );
+
+        return () => {
+            window.removeEventListener(
+                AUTH_EVENTS.LOGIN,
+                handleLogin 
+            );
+
+            window.removeEventListener(
+                AUTH_EVENTS.LOGOUT,
+                handleLogout 
+            );
+
+            window.removeEventListener(
+                AUTH_EVENTS.USER_UPDATED,
+                handleUserUpdated 
+            );
+        };
+    }, []);
+
+    return { 
+        user,
+        loading,
+        isAuthenticated: Boolean(user && getAccessToken()),
+        accessToken: getAccessToken(),
+        refreshToken: getRefreshToken(),
+        login,
+        logout,
+        refreshUser,
     };
-
-    // Derived state 
-    const isAuthenticated = Boolean(user);
-
-    return (
-        <AuthContext.Provider value={{ 
-            user, 
-            login, 
-            logout,
-            isAuthenticated, 
-            loading, 
-        }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
 };
 
-// Custom hook to consume Auth Context 
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
-};
-
-
-
-
+export default useAuth;
 
