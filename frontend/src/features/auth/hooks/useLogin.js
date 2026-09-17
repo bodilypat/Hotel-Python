@@ -1,29 +1,55 @@
-/* src/features/auth/hooks/useLogin.js 
-| -- Hook for handling login functionality
-| -- Trigger API calls for login
- */ 
-import { useMutation } from '@tanstack/react-query';
-import { login as loginApi } from '../services/auth.api';
-import { useAuth } from './useAuth';
+/* ***************************************** */
+/* File: src/features/auth/hooks/useLogin.js */ 
+/* ***************************************** */
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import useAuth from './useAuth';
+
 export const useLogin = () => {
-    const { setAuthData } = useAuth();
     const navigate = useNavigate();
+    const  { login } = useAuth();
 
-    return useMutation({
-        mutationFn: loginApi,
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-        onSuccess: (data) => {
-            const { token, user } = data;
-            setAuthData(token, user);
-            navigate('/dashboard'); // Redirect to dashboard after successful login
-        },
+    const submitLogin = async (credentials) => {
+        try {
+            setLoading(true);
+            setError('');
 
-        onError: (error) => {
-            console.error('Login failed:', error.response?.data?.message || error.message);
+            const response = await login(credentials);
+
+            const redirectTo = 
+                response?.redirectTo || 
+                response?.user?.redirectTo || 
+                '/dashboard';
+
+            navigate(redirectTo, {
+                replace: true,
+            });
+
+            return response;
+        } catch (err) {
+            setError(
+                err?.data?.message || 
+                err?.message || 
+                'Unable to sign in.'
+            );
+
+            throw err;
+        } finally {
+            setLoading(false);
         }
-    });
+    };
+
+    return {
+        loading,
+        error,
+        submitLogin,
+        clearError: () => setError(''),
+    };
 };
 
+export default useLogin;
 
